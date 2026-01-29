@@ -1,11 +1,88 @@
 import tkinter as tk
 
-from tkinter import ttk
+from tkinter import ttk, messagebox
+from crudcliente import crud_clientes
+
+crud_clientes = crud_clientes()
+
+def carga_clientes_en_tabla():
+    for item in tree.get_children():
+        tree.delete(item)
+    
+    for cliente in crud_clientes.todos():
+        tree.insert("","end",values=(cliente.id, cliente.nombre, cliente.apellido, cliente.cedula, cliente.telefono, cliente.email))
+
+def limpiar_campos():
+    var_id.set("")
+    var_nombre.set("")
+    var_apellido.set("")
+    var_cedula.set("")
+    var_telefono.set("")
+    var_email.set("")
+    txt_dir.delete("1.0", tk.END)
+
+def insertar():
+    nombre=var_nombre.get()
+    apellido=var_apellido.get()
+    cedula=var_cedula.get()
+    telefono=var_telefono.get()
+    email=var_email.get()
+    try:
+        crud_clientes.insertar(nombre, apellido, cedula, telefono, email)
+        carga_clientes_en_tabla()
+        limpiar_campos()
+    except ValueError as ve:
+        messagebox.showerror("Error", str(ve))   
+    
+def carga_informacion_cajas():
+    cliente_seleccionado = tree.selection()
+    if not cliente_seleccionado:
+        return
+    valores = tree.item(cliente_seleccionado[0],"values")
+    var_id.set(valores[0])
+    var_nombre.set(valores[1])
+    var_apellido.set(valores[2])
+    var_cedula.set(valores[3])
+    var_telefono.set(valores[4])
+    var_email.set(valores[5])
+    
+def actualizar():
+    id = var_id.get()
+    if not id:
+        messagebox.showerror("Error", "Seleccione un cliente para actualizar")
+        return
+    try:
+        crud_clientes.actualizar(
+            int(id),
+            var_nombre.get(),
+            var_apellido.get(),
+            var_cedula.get(),
+            var_telefono.get(),
+            var_email.get()
+        )
+        carga_clientes_en_tabla()
+        limpiar_campos()
+    except ValueError as ve:
+        messagebox.showerror("Error", str(ve))    
+
+def eliminar():
+    id = var_id.get()
+    if not id:
+        messagebox.showerror("Error", "Seleccione un cliente para eliminar")
+        return
+    confirmado = messagebox.askyesno("Confirmar", "¿Está seguro de eliminar este cliente?")
+    if confirmado:
+        eliminado = crud_clientes.eliminar(int(id))
+        if eliminado:
+            carga_clientes_en_tabla()
+            limpiar_campos()
+        else:
+            messagebox.showerror("Error", "No se pudo eliminar el cliente")
 
 root = tk.Tk()
 root.title("CRUD Clientes (Solo Interfaz)")
 root.geometry("900x500")
-root.resizable(False, False)
+
 
 # ---------- Contenedor principal ----------
 main = tk.Frame(root, padx=10, pady=10)
@@ -65,6 +142,12 @@ btn_actualizar.grid(row=0, column=2, padx=5, pady=5)
 btn_eliminar.grid(row=0, column=3, padx=5, pady=5)
 btn_limpiar.grid(row=0, column=4, padx=5, pady=5)
 
+btn_limpiar.config(command=limpiar_campos)
+btn_guardar.config(command=insertar)
+btn_nuevo.config(command=limpiar_campos)
+btn_actualizar.config(command=actualizar)
+btn_eliminar.config(command=eliminar) 
+
 # ---------- Frame Tabla ----------
 frm_tabla = tk.LabelFrame(main, text="Listado de clientes", padx=10, pady=10)
 frm_tabla.grid(row=0, column=1, rowspan=2, sticky="nsew")
@@ -97,6 +180,8 @@ tree.column("cedula", width=110)
 tree.column("telefono", width=110)
 tree.column("email", width=170)
 
+tree.bind("<<TreeviewSelect>>", lambda e: carga_informacion_cajas())
+
 # Scrollbars
 scroll_y = ttk.Scrollbar(frm_tabla, orient="vertical", command=tree.yview)
 scroll_x = ttk.Scrollbar(frm_tabla, orient="horizontal", command=tree.xview)
@@ -110,5 +195,8 @@ scroll_x.pack(side="bottom", fill="x")
 main.grid_columnconfigure(0, weight=0)
 main.grid_columnconfigure(1, weight=1)
 main.grid_rowconfigure(0, weight=1)
+
+
+carga_clientes_en_tabla()
 
 root.mainloop()
