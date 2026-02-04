@@ -1,4 +1,10 @@
-from ..Models.alumno_model import Alumno
+import os
+import sys
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(BASE_DIR)
+
+from Models.alumno_model import Alumno
 
 class AlumnoController:
     def __init__(self):
