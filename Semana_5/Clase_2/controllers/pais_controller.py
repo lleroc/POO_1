@@ -4,7 +4,7 @@ from models.pais_model import PaisModel
 class PaisController:
     def __init__(self, vista):
         self.vista = vista
-    
+     
     def cargar_lista(self):
         try:
             paises = PaisModel.todos()
