@@ -37,5 +37,5 @@ class ProveedorController:
             raise ValueError("El nombre es obligatorio.")
         if not ruc:
             raise ValueError("El RUC es obligatorio.")
-        if len(ruc) < 8:
-            raise ValueError("El RUC parece inválido (muy corto).")
+        if len(ruc) == 13:
+            raise ValueError("El RUC debe tener 13 caracteres.")
