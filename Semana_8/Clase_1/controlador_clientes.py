@@ -1,6 +1,9 @@
 from modelo_clientes import ModeloClientes
 
+from vista_cliente import VistaClientes
+
 class ControladorClientes:
+
     def __init__(self, ventana_dashboard):
         self.modelo_cliente =ModeloClientes()
         self.vista_cliente = VistaClientes(ventana_dashboard,self)
